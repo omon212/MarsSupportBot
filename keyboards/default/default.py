@@ -5,5 +5,6 @@ fullname_button = ReplyKeyboardMarkup(
         [
             KeyboardButton("Ism Familyangizni Jo'natish", request_contact=True)
         ]
-    ]
+    ],
+    resize_keyboard=True
 )
