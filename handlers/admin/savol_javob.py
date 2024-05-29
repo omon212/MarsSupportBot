@@ -84,8 +84,6 @@ async def next_button_handler(call: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text="back", state=States.admin_state)
 async def back_button_handler(call: types.CallbackQuery, state: FSMContext):
-
-
     data = await state.get_data()
     current_offset = data.get("offset", 0)
     new_offset = max(current_offset - 5, 0)
