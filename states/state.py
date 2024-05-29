@@ -7,5 +7,5 @@ class States(StatesGroup):
     fullname = State()
     admin_state = State()
     admin_savol = State()
- = State()
-
+    video_yes_no = State()
+    video_caption = State()
