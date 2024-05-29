@@ -58,7 +58,6 @@ async def savolarni_korish_func(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(text="next", state=States.admin_state)
 async def next_button_handler(call: types.CallbackQuery, state: FSMContext):
-
     data = await state.get_data()
     current_offset = data.get("offset", 0)
     questions = cursor.execute("SELECT * FROM questions").fetchall()
@@ -103,7 +102,8 @@ async def back_button_handler(call: types.CallbackQuery, state: FSMContext):
 
     await call.message.edit_reply_markup(reply_markup=questions_btn)
 
-@dp.callback_query_handler( state=States.admin_state)
+
+@dp.callback_query_handler(state=States.admin_state)
 async def next_button_handler(call: types.CallbackQuery, state: FSMContext):
     if call.data == "back":
         pass
@@ -120,3 +120,83 @@ Savol: {data[1]}
 
 Javob: {data[3]}        
         """)
+
+
+@dp.message_handler(text="Savollarni O'chirish ❌", state=States.admin_state)
+async def savollarni_ochirish(message: types.Message, state: FSMContext):
+    questions = cursor.execute("SELECT * FROM questions").fetchall()
+    await state.update_data(offset=0)
+
+    questions_btn = InlineKeyboardMarkup()
+    for i, question in enumerate(questions[:5], start=1):
+        questions_btn.add(InlineKeyboardButton(text=question[1], callback_data=question[0]))
+
+    questions_btn.add(
+        InlineKeyboardButton("Orqaga ⬅️", callback_data="delete_back"),
+        InlineKeyboardButton("Oldinga ➡️", callback_data="delete_next"),
+    )
+    await message.answer("O'chirish Uchun Savol Tanlang:", reply_markup=questions_btn)
+    await state.finish()
+    await States.delete_savollar.set()
+
+
+@dp.callback_query_handler(text="delete_next", state=States.delete_savollar)
+async def next_button_handler(call: types.CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    current_offset = data.get("offset", 0)
+    questions = cursor.execute("SELECT * FROM questions").fetchall()
+    remaining_questions = questions[current_offset + 5:]
+
+    if not remaining_questions:
+        await call.answer("Boshqa savol qolmagan")
+        return
+
+    await state.update_data(offset=current_offset + 5)
+    questions_btn = InlineKeyboardMarkup()
+    for i, question in enumerate(remaining_questions[:5], start=current_offset + 6):
+        question_id = question[0]
+        questions_btn.add(InlineKeyboardButton(text=question[1], callback_data=f"del{question_id}"))
+
+    questions_btn.add(
+        InlineKeyboardButton("Orqaga ⬅️", callback_data="delete_back"),
+        InlineKeyboardButton("Oldinga ➡️", callback_data="delete_next"),
+    )
+
+    await call.message.edit_reply_markup(reply_markup=questions_btn)
+
+
+@dp.callback_query_handler(text="delete_back", state=States.delete_savollar)
+async def back_button_handler(call: types.CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    current_offset = data.get("offset", 0)
+    new_offset = max(current_offset - 5, 0)
+    questions = cursor.execute("SELECT * FROM questions").fetchall()
+    previous_questions = questions[new_offset:new_offset + 5]
+
+    await state.update_data(offset=new_offset)
+    questions_btn = InlineKeyboardMarkup()
+    for i, question in enumerate(previous_questions, start=new_offset + 1):
+        question_id = question[0]
+        questions_btn.add(InlineKeyboardButton(text=question[1], callback_data=f"del{question_id}"))
+
+    questions_btn.add(
+        InlineKeyboardButton("Orqaga ⬅️", callback_data="delete_back"),
+        InlineKeyboardButton("Oldinga ➡️", callback_data="delete_next"),
+    )
+
+    await call.message.edit_reply_markup(reply_markup=questions_btn)
+
+
+@dp.callback_query_handler(state=States.delete_savollar)
+async def next_button_handler(call: types.CallbackQuery, state: FSMContext):
+    if call.data == "delete_next":
+        pass
+    if call.data == "delete_back":
+        pass
+    else:
+        await call.message.delete()
+        id = int(call.data[3])
+        print(id)
+        data = cursor.execute("DELETE FROM questions WHERE id = ?", (id,))
+        await state.finish()
+        await States.admin_state.set()

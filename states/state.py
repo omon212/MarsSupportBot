@@ -9,3 +9,5 @@ class States(StatesGroup):
     admin_savol = State()
     video_yes_no = State()
     video_caption = State()
+    savollar = State()
+    delete_savollar = State()
