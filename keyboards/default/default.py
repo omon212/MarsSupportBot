@@ -19,3 +19,12 @@ admin_button = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+
+savollar_btn = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton("Savollar 👀")
+        ]
+    ],
+    resize_keyboard=True
+)
