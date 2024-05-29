@@ -116,9 +116,9 @@ async def next_button_handler(call: types.CallbackQuery, state: FSMContext):
         data = cursor.execute("SELECT * FROM questions WHERE id = ?", (id,)).fetchone()
         print(data[2])
         await call.message.answer_video(video=data[2], caption=f"""
-Savol: {data[1]}
+<b>Savol</b> : {data[1]}
 
-Javob: {data[3]}        
+<b>Javob</b> : {data[3]}        
         """)
 
 
