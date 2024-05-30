@@ -16,4 +16,4 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS questions (
                 caption TEXT
                 )""")
 
-
+connect.commit()

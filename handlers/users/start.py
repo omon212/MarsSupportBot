@@ -14,7 +14,7 @@ from data.config import ADMINS
 from keyboards.default.default import *
 
 
-@dp.message_handler(CommandStart())
+@dp.message_handler(CommandStart(),state="*")
 async def bot_start(message: types.Message, state: FSMContext):
     print(message.from_user.id)
     print(ADMINS)

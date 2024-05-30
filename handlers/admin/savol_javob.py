@@ -43,17 +43,21 @@ async def savol_func(message: types.Message):
 @dp.message_handler(text="Savollarni Ko'rish 👀", state=States.admin_state)
 async def savolarni_korish_func(message: types.Message, state: FSMContext):
     questions = cursor.execute("SELECT * FROM questions").fetchall()
-    await state.update_data(offset=0)
+    a = []
+    if questions == a:
+        await message.answer("Savollar Mavjud Emas !")
+    else:
+        await state.update_data(offset=0)
 
-    questions_btn = InlineKeyboardMarkup()
-    for i, question in enumerate(questions[:5], start=1):
-        questions_btn.add(InlineKeyboardButton(text=question[1], callback_data=question[0]))
+        questions_btn = InlineKeyboardMarkup()
+        for i, question in enumerate(questions[:5], start=1):
+            questions_btn.add(InlineKeyboardButton(text=question[1], callback_data=question[0]))
 
-    questions_btn.add(
-        InlineKeyboardButton("Orqaga ⬅️", callback_data="back"),
-        InlineKeyboardButton("Oldinga ➡️", callback_data="next"),
-    )
-    await message.answer("Savollar:", reply_markup=questions_btn)
+        questions_btn.add(
+            InlineKeyboardButton("Orqaga ⬅️", callback_data="back"),
+            InlineKeyboardButton("Oldinga ➡️", callback_data="next"),
+        )
+        await message.answer("Savollar:", reply_markup=questions_btn)
 
 
 @dp.callback_query_handler(text="next", state=States.admin_state)
@@ -129,7 +133,7 @@ async def savollarni_ochirish(message: types.Message, state: FSMContext):
 
     questions_btn = InlineKeyboardMarkup()
     for i, question in enumerate(questions[:5], start=1):
-        questions_btn.add(InlineKeyboardButton(text=question[1], callback_data=question[0]))
+        questions_btn.add(InlineKeyboardButton(text=question[1], callback_data=f"del{question[0]}"))
 
     questions_btn.add(
         InlineKeyboardButton("Orqaga ⬅️", callback_data="delete_back"),
@@ -197,6 +201,15 @@ async def next_button_handler(call: types.CallbackQuery, state: FSMContext):
         await call.message.delete()
         id = int(call.data[3])
         print(id)
-        data = cursor.execute("DELETE FROM questions WHERE id = ?", (id,))
+        data = cursor.execute("SELECT * FROM questions WHERE id = ?", (id,)).fetchone()
+        print(data)
+        cursor.execute("DELETE FROM questions WHERE id = ?", (id,))
+        await call.message.answer(f"""
+<b>{data[1]}</b>
+
+Nomli Savol O'chirildi
+        """)
         await state.finish()
         await States.admin_state.set()
+
+
