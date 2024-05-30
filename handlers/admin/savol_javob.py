@@ -17,21 +17,18 @@ async def adder_savol(message: types.Message):
 @dp.message_handler(state=States.admin_savol, content_types=types.ContentType.TEXT)
 async def savol_func(message: types.Message):
     question = message.text
-    print(question)
     await message.answer('Video Jo`nating 📹')
     await States.video_yes_no.set()
 
     @dp.message_handler(state=States.video_yes_no, content_types=types.ContentType.VIDEO)
     async def video_saver(message: types.Message):
         video = message.video['file_id']
-        print(video)
         await States.video_caption.set()
         await message.answer('Video uchun yozuv qoldiring 💬')
 
         @dp.message_handler(state=States.video_caption, content_types=types.ContentType.TEXT)
         async def caption_saver(message: types.Message, state: FSMContext):
             caption = message.text
-            print(caption)
             cursor.execute("INSERT INTO questions (question, video, caption) VALUES (?, ?, ?)",
                            (question, video, caption))
             connect.commit()
@@ -116,13 +113,9 @@ async def next_button_handler(call: types.CallbackQuery, state: FSMContext):
     else:
         await call.message.delete()
         id = int(call.data)
-        print(id)
         data = cursor.execute("SELECT * FROM questions WHERE id = ?", (id,)).fetchone()
-        print(data[2])
         await call.message.answer_video(video=data[2], caption=f"""
-<b>Savol</b> : {data[1]}
-
-<b>Javob</b> : {data[3]}        
+<b>Yechim</b> : {data[2]}     
         """)
 
 
@@ -200,9 +193,7 @@ async def next_button_handler(call: types.CallbackQuery, state: FSMContext):
     else:
         await call.message.delete()
         id = int(call.data[3])
-        print(id)
         data = cursor.execute("SELECT * FROM questions WHERE id = ?", (id,)).fetchone()
-        print(data)
         cursor.execute("DELETE FROM questions WHERE id = ?", (id,))
         await call.message.answer(f"""
 <b>{data[1]}</b>

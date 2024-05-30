@@ -14,20 +14,17 @@ from data.config import ADMINS
 from keyboards.default.default import *
 
 
-@dp.message_handler(CommandStart(),state="*")
+@dp.message_handler(CommandStart(), state="*")
 async def bot_start(message: types.Message, state: FSMContext):
-    print(message.from_user.id)
-    print(ADMINS)
     if str(message.from_user.id) in ADMINS:
         await message.answer(f'Assalomu aleykum <b>{message.from_user.full_name}</b>')
         await message.answer('Siz admin paneldasiz 👤🎛', reply_markup=admin_button)
         await States.admin_state.set()
     else:
         user = cursor.execute("SELECT * FROM support WHERE user_id = ?", (message.from_user.id,)).fetchone()
-        print(user)
         if user is not None:
             await message.answer(f"Assalomu aleykum <b>{message.from_user.first_name}</b>")
-            await message.answer("Sizni Qanday Savollar Qiynamoqda ?", reply_markup=savollar_btn)
+            await message.answer("Sizni qanday savollar qiynamoqda", reply_markup=savollar_btn)
             await States.savollar.set()
         else:
             await message.answer(f"Assalomu aleykum {message.from_user.first_name}")
@@ -42,13 +39,12 @@ async def fulname(message: types.Message, state: FSMContext):
     cursor.execute("INSERT INTO support (user_id, fullname) VALUES (?, ?)",
                    (message.from_user.id, message.contact.full_name))
     connect.commit()
-    await message.answer("Sizni Qanday Savollar Qiynamoqda ?", reply_markup=savollar_btn)
+    await message.answer("Sizni qanday savollar qiynamoqda ?", reply_markup=savollar_btn)
     await States.savollar.set()
 
 
 @dp.message_handler(text="Savollar 👀", state=States.savollar)
 async def savollar(message: types.Message, state: FSMContext):
-    print(True)
     questions = cursor.execute("SELECT * FROM questions").fetchall()
     await state.update_data(offset=0)
 
@@ -60,7 +56,7 @@ async def savollar(message: types.Message, state: FSMContext):
         InlineKeyboardButton("Orqaga ⬅️", callback_data="question_back"),
         InlineKeyboardButton("Oldinga ➡️", callback_data="question_next"),
     )
-    await message.answer("Savollar:", reply_markup=questions_btn)
+    await message.answer("<b>Savollar</b> : ", reply_markup=questions_btn)
 
 
 @dp.callback_query_handler(text="question_next", state=States.savollar)
@@ -119,12 +115,8 @@ async def next_button_handler(call: types.CallbackQuery, state: FSMContext):
     else:
         await call.message.delete()
         id = int(call.data)
-        print(id)
         data = cursor.execute("SELECT * FROM questions WHERE id = ?", (id,)).fetchone()
-        print(data[2])
         await call.message.answer_video(video=data[2], caption=f"""
-<b>Savol</b> : {data[1]}
-
-<b>Javob</b> : {data[3]}        
+<b>Yechim</b> : {data[3]}        
         """)
         await state.finish()
