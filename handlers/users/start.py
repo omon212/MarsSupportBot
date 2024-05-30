@@ -46,17 +46,21 @@ async def fulname(message: types.Message, state: FSMContext):
 @dp.message_handler(text="Savollar 👀", state=States.savollar)
 async def savollar(message: types.Message, state: FSMContext):
     questions = cursor.execute("SELECT * FROM questions").fetchall()
-    await state.update_data(offset=0)
+    a = []
+    if questions == a:
+        await message.answer("Savollar hozircha mavjud emas !")
+    else:
+        await state.update_data(offset=0)
 
-    questions_btn = InlineKeyboardMarkup()
-    for i, question in enumerate(questions[:5], start=1):
-        questions_btn.add(InlineKeyboardButton(text=question[1], callback_data=question[0]))
+        questions_btn = InlineKeyboardMarkup()
+        for i, question in enumerate(questions[:5], start=1):
+            questions_btn.add(InlineKeyboardButton(text=question[1], callback_data=question[0]))
 
-    questions_btn.add(
-        InlineKeyboardButton("Orqaga ⬅️", callback_data="question_back"),
-        InlineKeyboardButton("Oldinga ➡️", callback_data="question_next"),
-    )
-    await message.answer("<b>Savollar</b> : ", reply_markup=questions_btn)
+        questions_btn.add(
+            InlineKeyboardButton("Orqaga ⬅️", callback_data="question_back"),
+            InlineKeyboardButton("Oldinga ➡️", callback_data="question_next"),
+        )
+        await message.answer("<b>Savollar</b> : ", reply_markup=questions_btn)
 
 
 @dp.callback_query_handler(text="question_next", state=States.savollar)

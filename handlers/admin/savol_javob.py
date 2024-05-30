@@ -115,26 +115,30 @@ async def next_button_handler(call: types.CallbackQuery, state: FSMContext):
         id = int(call.data)
         data = cursor.execute("SELECT * FROM questions WHERE id = ?", (id,)).fetchone()
         await call.message.answer_video(video=data[2], caption=f"""
-<b>Yechim</b> : {data[2]}     
+<b>Yechim</b> : {data[3]}     
         """)
 
 
 @dp.message_handler(text="Savollarni O'chirish ❌", state=States.admin_state)
 async def savollarni_ochirish(message: types.Message, state: FSMContext):
     questions = cursor.execute("SELECT * FROM questions").fetchall()
-    await state.update_data(offset=0)
+    a = []
+    if questions == a:
+        await message.answer("Savollar Mavjud Emas !")
+    else:
+        await state.update_data(offset=0)
 
-    questions_btn = InlineKeyboardMarkup()
-    for i, question in enumerate(questions[:5], start=1):
-        questions_btn.add(InlineKeyboardButton(text=question[1], callback_data=f"del{question[0]}"))
+        questions_btn = InlineKeyboardMarkup()
+        for i, question in enumerate(questions[:5], start=1):
+            questions_btn.add(InlineKeyboardButton(text=question[1], callback_data=f"del{question[0]}"))
 
-    questions_btn.add(
-        InlineKeyboardButton("Orqaga ⬅️", callback_data="delete_back"),
-        InlineKeyboardButton("Oldinga ➡️", callback_data="delete_next"),
-    )
-    await message.answer("O'chirish Uchun Savol Tanlang:", reply_markup=questions_btn)
-    await state.finish()
-    await States.delete_savollar.set()
+        questions_btn.add(
+            InlineKeyboardButton("Orqaga ⬅️", callback_data="delete_back"),
+            InlineKeyboardButton("Oldinga ➡️", callback_data="delete_next"),
+        )
+        await message.answer("O'chirish Uchun Savol Tanlang:", reply_markup=questions_btn)
+        await state.finish()
+        await States.delete_savollar.set()
 
 
 @dp.callback_query_handler(text="delete_next", state=States.delete_savollar)
