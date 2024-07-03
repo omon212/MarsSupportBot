@@ -7,7 +7,6 @@ from utils.notify_admins import on_startup_notify
 from utils.set_bot_commands import set_default_commands
 from data.config import BOT_TOKEN
 from aiogram.utils.executor import start_webhook
-
 from aiohttp import web
 
 WEBHOOK_HOST = 'https://marsgame.uz'
