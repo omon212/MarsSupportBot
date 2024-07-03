@@ -7,11 +7,13 @@ from states.state import States
 from keyboards.default.default import fullname_button
 from data.config import DATABASE_PATH
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
+from data.config import BOT_TOKEN
 connect = sqlite3.connect(DATABASE_PATH)
 cursor = connect.cursor()
 from data.config import ADMINS
 from keyboards.default.default import *
+
+
 
 
 @dp.message_handler(CommandStart(), state="*")
