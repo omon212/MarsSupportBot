@@ -5,17 +5,17 @@ from aiogram import types
 import middlewares, filters, handlers
 from utils.notify_admins import on_startup_notify
 from utils.set_bot_commands import set_default_commands
-from data.config import BOT_TOKEN
+from data.config import BOT_TOKEN, WEBAPP_HOST, WEBHOOK_PATH_NAME, WEBHOOK_HOST, WEBAPP_PORT
 from aiogram.utils.executor import start_webhook
 from aiohttp import web
 
-WEBHOOK_HOST = 'https://marsgame.uz'
-WEBHOOK_PATH = f'/webhook/{BOT_TOKEN}/'
+WEBHOOK_PATH = f'/{WEBHOOK_PATH_NAME}/{BOT_TOKEN}/'
 WEBHOOK_URL = f'{WEBHOOK_HOST}{WEBHOOK_PATH}'
-WEBAPP_HOST = 'localhost'
-WEBAPP_PORT = 3001
+WEBAPP_HOST = WEBAPP_HOST
+WEBAPP_PORT = WEBAPP_PORT
 
 logging.basicConfig(level=logging.INFO)
+
 
 async def on_startup(dispatcher):
     # Birlamchi komandalar (/start va /help)
@@ -25,6 +25,7 @@ async def on_startup(dispatcher):
     # Webhookni sozlash
     await bot.set_webhook(WEBHOOK_URL)
 
+
 async def on_shutdown(dispatcher):
     logging.warning('Shutting down..')
     await bot.delete_webhook()
@@ -33,6 +34,7 @@ async def on_shutdown(dispatcher):
     await dp.storage.wait_closed()
     logging.warning('Bye!')
 
+
 async def handle(request):
     try:
         update = await request.json()
@@ -40,6 +42,7 @@ async def handle(request):
         return web.Response()
     except Exception as e:
         logging.exception(e)
+
 
 if __name__ == '__main__':
     app = web.Application()
